@@ -2,7 +2,7 @@ BUILD_DIR=build
 LANDSLIDE_OPTIONS=--embed --linenos=table
 
 # To install landslide: pip3 install --user landslide
-LANDSLIDE=$(HOME)/.local/bin/landslide
+LANDSLIDE=/usr/bin/landslide
 
 
 all: createdir presentation

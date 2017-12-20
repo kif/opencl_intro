@@ -8,17 +8,17 @@
    </style>
 
 1. OpenCL basics
-=================
+================
+
 
 
 ----
 
-
 OpenCL device, context, queue
-------------------------------
+-----------------------------
 
-* A **device** refers to a target physical device (GPU, multi-core CPU, accelerator)
-    * The "parallelized code" is executed on the device
+* A **device** refers to a target physical device (GPU, multi-core CPU, accelerator, FPGA)
+    * The "parallelized code" is executed on the device (kernel)
     * The device is controlled by the *host* (CPU)
 * The device is tied to the host by one (or several) **context**
 * Each context contains a **queue** of instructions
@@ -31,7 +31,8 @@ OpenCL device, context, queue
 
 
 .. code-block:: python
-
+    
+    import pyopencl as cl
     ctx = cl.create_some_context()
     queue = cl.CommandQueue(ctx)
     cl.enqueue_copy(queue, d_myarray, myarray)
@@ -46,7 +47,7 @@ OpenCL device, context, queue
 ----
 
 Threads, grid and groups
--------------------------
+------------------------
 
 * A **thread** is a sequence of instructions executed by a computing unit (physical core)
 * Threads can be launched by **groups** sharing cached memory
@@ -64,12 +65,12 @@ Threads, grid and groups
 ----
 
 Threads, grid and groups
--------------------------
+------------------------
 
 Before calling an instruction, one has to specify
 
 * The grid size : how many threads will be launched in total
-* The work group size : how many threads are grouped
+* The work group size : how many threads are grouped togeather an run on the same piece of hardware
 
 .. figure:: ../images/gridblock.png
    :align: center
@@ -80,7 +81,7 @@ Before calling an instruction, one has to specify
 
 
 OpenCL kernels
----------------
+--------------
 
 * A *kernel* is a fundamental function executed by each thread
 * All the threads execute the same kernel
@@ -92,7 +93,7 @@ OpenCL kernels
 Some remarks on kernels code :
 
 * A kernel has no return value (``void`` function)
-* A kernel cannot call another kernel
+* A kernel cannot call another kernel (in OpenCL v1)
 * Always check array bounds inside kernels !
 
 .. notes: 
@@ -103,14 +104,14 @@ Some remarks on kernels code :
 ----
 
 Our first OpenCL kernel
-------------------------
+-----------------------
 
 .. code-block:: C
 
-    __kernel void gpu_add(
-        __global float* arr1, 
-        __global float* arr2, 
-        __global float* res, 
+    kernel void gpu_add(
+        global float* arr1, 
+        global float* arr2, 
+        global float* res, 
         int N) 
     {
         int tid = get_global_id(0); // Thread ID
@@ -121,8 +122,8 @@ Our first OpenCL kernel
     
 .. notes: No loop ! Faire un dessin
 
-* The kernel codes are identified with the ``__kernel`` prefix
-* The ``__global`` prefix indicates that the array is on the device central memory
+* The kernel codes are identified with the ``kernel`` prefix
+* The ``global`` prefix indicates that the array is on the device central memory
 * In OpenCL, the kernel codes can be provided
     * As a C string (``const char*``)
     * In a separate ``.cl`` file. Recommended for readability !
@@ -130,7 +131,7 @@ Our first OpenCL kernel
 ----
 
 Our first (py)OpenCL kernel launch
------------------------------------
+----------------------------------
 
 Now that the kernel is written, it has to be called from the *host*.
 
@@ -168,7 +169,7 @@ Now that the kernel is written, it has to be called from the *host*.
 ----
 
 Launching OpenCL kernels
--------------------------
+------------------------
 
 Standard way to launch a kernel :
 
@@ -185,7 +186,7 @@ Standard way to launch a kernel :
 ----
 
 Exercises
------------
+---------
 
 1) Write a kernel performing a scalar addition of two arrays.
 2) Write the associated host code.
@@ -194,7 +195,7 @@ Exercises
 ----
 
 Multi-dimensional grids
-------------------------
+-----------------------
 
 * Remember that threads can be grouped to perform a task (*thread work group*)
 * All the launched threads belong to the *grid*
@@ -222,7 +223,7 @@ Launching a kernel handling a 2D array:
 ----
 
 Threads: global and local index
---------------------------------
+-------------------------------
 
 For given grid and work-group shapes, each threads are indexed with
 
@@ -250,7 +251,7 @@ For given grid and work-group shapes, each threads are indexed with
 ----
 
 Exercise
----------
+--------
 
 1) Write a kernel taking returning a block-matrix containing the values *I+J* where *I*, *J* are the group indices of dimensions 0, 1.
 

@@ -9,17 +9,17 @@
 
 
 3. Parallel patterns
-=====================
+====================
 
 ----
 
 
 Introduction
--------------
+------------
 
 In parallel programming, common memory access patterns are
 
-* Element-wise
+* Element-wise (map)
 * Scatter
 * Gather
 * Reduction
@@ -29,8 +29,9 @@ In parallel programming, common memory access patterns are
    :align: center
    :width: 400
    
-
-* Other patterns: compact, map, scan, partition
+They gave a set of corresponding algorithm with in addition the prefix-sum (scan) which were derived in 
+other patterns like : 
+compaction, partition, radix-, quick-, merge-sort, polynomial evaluation, string comparison, tree operations, histograms, ...
 
 .. notes: compact/expand ; map/reduce ; scan (eg. cumsum)
 .. notes: https://stanford-cs193g-sp2010.googlecode.com/svn/trunk/lectures/lecture_6/parallel_patterns_1.pdf
@@ -40,8 +41,8 @@ In parallel programming, common memory access patterns are
 
 ----
 
-Element-wise access
---------------------
+Element-wise access or *map*
+----------------------------
 
 * Each thread access to one memory location
 * There is an "obvious" one-to-one thread-memory map (preferably coalesced)
@@ -50,7 +51,7 @@ Element-wise access
 ----
 
 Exercices
-----------
+---------
 
 1) Write a kernel performing the sum of two 2D ``float`` arrays.
 
@@ -61,14 +62,14 @@ Exercices
 ----
 
 Example: flat-field correction
--------------------------------
+------------------------------
 
 .. code-block:: C
 
-    __kernel void flatfield(
-        __global float* image, 
-        __global float* dark,
-        __global float* flat, 
+    kernel void flatfield(
+        global float* image, 
+        global float* dark,
+        global float* flat, 
         int Nr, 
         int Nc)
     {
@@ -85,8 +86,8 @@ Example: flat-field correction
 
 ----
 
-Scatter/Gather 
----------------
+Scatter/Gather
+--------------
 
 * Gather: read multiple data items to a single location 
 * Scatter: write a single data item to multiple locations 
@@ -101,7 +102,7 @@ Read/write issues
 ----
 
 Atomic operations
-------------------
+-----------------
 
 * Making different threads write to the same memory location results in a conflict.
 * Solution: **atomic operations**, i.e operations that cannot be interrupted
@@ -120,7 +121,7 @@ For a ``compare-exchange``-based implementation, see for example `<https://strea
 ----
 
 Exercices
-----------
+---------
 
 1) Write a kernel performing a 2x2 binning of an image (its dimensions are assumed to be even).
 
@@ -131,7 +132,7 @@ Exercices
 
 
 Reduction
-----------
+---------
 
 * Accumulate elements with a given operator (+, -, ``*``, ...)
 * Examples: sum the elements of an array, dot product
@@ -150,7 +151,7 @@ Reduction
 ----
 
 Reduction: example
--------------------
+------------------
 
 .. code-block:: C
 
@@ -177,7 +178,7 @@ Reduction: example
 ----
     
 Reduction
-----------
+---------
 
 Common pattern: two-stage reductions
 
@@ -192,8 +193,62 @@ Look around first before writing your own reductions !
 * pyopencl comes with various `built-in reductions <https://documen.tician.de/pyopencl/algorithm.html#module-pyopencl.reduction>`_
 
 
+---- 
+
+Prefix-Sum (Guy Blelloch, 1990)
+-------------------------------
+
+Starts with a reduction called *collect phase*
+
+.. figure:: ../images/prefix1.png
+   :align: center
+   :width: 400
+
+Then continue with a *distribute phase*
+
+.. figure:: ../images/prefix2.png
+   :align: center
+   :width: 400
+
+----
+
+Application of Prefix-Sum
+-------------------------
+
+* Compaction (remove masked elements in an array, keeping order)
+* Polynom evaluation
+* Sort (radix- and quick- and merge-sort)
 
 
+`Prefix sum and their application <http://www.cs.cmu.edu/~guyb/papers/Ble93.pdf>`_
+
+----
+
+Bitonic sort
+============
+
+Category on its own. Allows a sort by playing a partition ...
+
+.. figure:: ../images/bitonic.png
+   :align: center
+   :width: 800
 
 
+-----
+
+Summary
+=======
+
+* Few parallel algorithms exists
+
+ - Map
+ - Scatter
+ - Gather
+ - Reduction
+ - Scan
+ - Compact
+ - Bitonic
+
+* No need to implement them as PyOpenCL provides them all.
+  Learn how to use them instead of coding them
 
